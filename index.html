@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>VideoFire - Login</title>
+  <style>
+    body { background:#121212; color:white; font-family:sans-serif; text-align:center; padding:50px; }
+    input, button { padding:10px; margin:10px; width:80%; }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDes3ioeygnWBqJB6NnHb7xj732JJhOqm8",
+      authDomain: "videofire-268ff.firebaseapp.com",
+      databaseURL: "https://videofire-268ff-default-rtdb.firebaseio.com",
+      projectId: "videofire-268ff",
+      storageBucket: "videofire-268ff.appspot.com",
+      messagingSenderId: "910374058927",
+      appId: "1:910374058927:web:6add3afdea07cfa2914d5a"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+</head>
+<body>
+
+  <h1>VideoFire 🔥</h1>
+
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+  <br>
+
+  <button onclick="login()">Login</button>
+  <button onclick="register()">Register</button>
+  <button onclick="forgot()">Forgot Password</button>
+
+  <script>
+    function login() {
+      firebase.auth().signInWithEmailAndPassword(
+        email.value, password.value
+      ).then(userCredential => {
+        if (!userCredential.user.emailVerified) {
+          alert("Please verify email");
+        } else {
+          location.href = "home.html";
+        }
+      }).catch(e => alert(e.message));
+    }
+
+    function register() {
+      firebase.auth().createUserWithEmailAndPassword(
+        email.value, password.value
+      ).then(userCredential => {
+        userCredential.user.sendEmailVerification();
+        alert("Verification email sent");
+      }).catch(e => alert(e.message));
+    }
+
+    function forgot() {
+      firebase.auth().sendPasswordResetEmail(email.value)
+        .then(() => alert("Reset email sent"))
+        .catch(e => alert(e.message));
+    }
+  </script>
+
+</body>
+</html>
