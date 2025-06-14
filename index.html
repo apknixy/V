@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>VideoFire - Login</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="firebase.js"></script>
+  <style>
+    body { background: #121212; color: white; font-family: Arial; text-align: center; }
+    input, button { margin: 10px; padding: 10px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h1>VideoFire 🔥</h1>
+
+  <div>
+    <input id="email" placeholder="Email" type="email"><br>
+    <input id="password" placeholder="Password" type="password"><br>
+    <button onclick="login()">Login</button>
+    <button onclick="register()">Register</button>
+    <button onclick="googleLogin()">Login with Google</button>
+  </div>
+
+  <p id="msg"></p>
+
+  <script>
+    function register() {
+      const email = email.value;
+      const password = password.value;
+
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(() => {
+          document.getElementById('msg').innerText = "Registered successfully.";
+        }).catch(e => document.getElementById('msg').innerText = e.message);
+    }
+
+    function login() {
+      const email = email.value;
+      const password = password.value;
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+          location.href = "home.html";
+        }).catch(e => document.getElementById('msg').innerText = e.message);
+    }
+
+    function googleLogin() {
+      var provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then(result => {
+          location.href = "home.html";
+        }).catch(e => document.getElementById('msg').innerText = e.message);
+    }
+  </script>
+</body>
+</html>
