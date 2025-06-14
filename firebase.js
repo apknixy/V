@@ -1,4 +1,4 @@
-// Firebase Configuration
+// Firebase config already present
 const firebaseConfig = {
   apiKey: "AIzaSyDes3ioeygnWBqJB6NnHb7xj732JJhOqm8",
   authDomain: "videofire-268ff.firebaseapp.com",
@@ -11,7 +11,5 @@ const firebaseConfig = {
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
-
-// Firebase services
 const auth = firebase.auth();
 const db = firebase.database();
