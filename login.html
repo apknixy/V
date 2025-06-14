@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>VideoFire - Login</title>
+  <script type="module" src="./firebase.js"></script>
+  <style>
+    body { background:#121212; color:white; font-family:sans-serif; text-align:center; }
+    input { padding:10px; margin:5px; width:80%; }
+    button { padding:10px 20px; margin:5px; }
+  </style>
+</head>
+<body>
+  <h1>VideoFire 🔥</h1>
+  <h2>Login / Register</h2>
+  <input type="email" id="email" placeholder="Email" /><br/>
+  <input type="password" id="password" placeholder="Password" /><br/>
+  <button onclick="login()">Login</button>
+  <button onclick="register()">Register</button>
+  <button onclick="googleSignIn()">Google Sign-In</button>
+  <br/>
+  <button onclick="forgot()">Forgot Password?</button>
+
+  <script type="module">
+    import { auth, provider } from './firebase.js';
+    import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+    window.login = async function() {
+      let email = emailInput.value;
+      let password = passwordInput.value;
+      try {
+        let userCredential = await signInWithEmailAndPassword(auth, email, password);
+        if(!userCredential.user.emailVerified) {
+          alert("Please verify your email first.");
+          return;
+        }
+        alert("Login successful");
+        window.location.href = "home.html";
+      } catch(e) { alert(e.message); }
+    }
+
+    window.register = async function() {
+      let email = emailInput.value;
+      let password = passwordInput.value;
+      try {
+        let userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await sendEmailVerification(userCredential.user);
+        alert("Verification email sent.");
+      } catch(e) { alert(e.message); }
+    }
+
+    window.googleSignIn = async function() {
+      try {
+        let result = await signInWithPopup(auth, provider);
+        alert("Google Login Successful");
+        window.location.href = "home.html";
+      } catch(e) { alert(e.message); }
+    }
+
+    window.forgot = async function() {
+      let email = emailInput.value;
+      try {
+        await sendPasswordResetEmail(auth, email);
+        alert("Reset link sent to email.");
+      } catch(e) { alert(e.message); }
+    }
+
+    let emailInput = document.getElementById("email");
+    let passwordInput = document.getElementById("password");
+  </script>
+</body>
+</html>
