@@ -1,5 +1,5 @@
-// Firebase config already present
-const firebaseConfig = {
+// Your web app's Firebase configuration
+var firebaseConfig = {
   apiKey: "AIzaSyDes3ioeygnWBqJB6NnHb7xj732JJhOqm8",
   authDomain: "videofire-268ff.firebaseapp.com",
   databaseURL: "https://videofire-268ff-default-rtdb.firebaseio.com",
@@ -11,5 +11,3 @@ const firebaseConfig = {
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.database();
