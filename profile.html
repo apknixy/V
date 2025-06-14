@@ -1,35 +1,62 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Profile - VideoFire</title>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="firebase.js"></script>
+<title>My Profile - VideoFire 🔥</title>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDes3ioeygnWBqJB6NnHb7xj732JJhOqm8",
+    authDomain: "videofire-268ff.firebaseapp.com",
+    databaseURL: "https://videofire-268ff-default-rtdb.firebaseio.com",
+    projectId: "videofire-268ff",
+    storageBucket: "videofire-268ff.appspot.com",
+    messagingSenderId: "910374058927",
+    appId: "1:910374058927:web:6add3afdea07cfa2914d5a"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+</script>
+
 </head>
-<body style="background:#121212; color:white; text-align:center;">
 
-  <h1>👤 My Profile</h1>
+<body style="background-color: black; color: white; font-family: Arial;">
+  <h1>🔥 VideoFire Profile 🔥</h1>
   <div id="profile"></div>
+  <h3>My Uploaded Videos:</h3>
+  <div id="myvideos"></div>
 
-  <script>
-    auth.onAuthStateChanged(user => {
-      if (!user) {
-        location.href = "index.html";
-      } else {
-        db.ref("users/" + user.uid).once("value", snap => {
-          const data = snap.val();
-          document.getElementById("profile").innerHTML = `
-            <p>Username: ${data.username}</p>
-            <p>Email: ${data.email}</p>
-            <p>Total Earnings: ₹${data.totalEarnings || 0}</p>
-            <p>Total Views: ${data.totalViews || 0}</p>
-            <p>Withdrawable Balance: ₹${data.withdrawBalance || 0}</p>
-          `;
-        });
-      }
-    });
-  </script>
+<script>
+const userId = localStorage.getItem("uid"); // Auth ke baad userID store hoga
+
+db.ref("users/" + userId).once("value").then((snapshot) => {
+  const data = snapshot.val();
+  document.getElementById("profile").innerHTML = `
+    <h2>${data.emoji} ${data.username}</h2>
+    <p>Total Views: ${data.totalViews || 0}</p>
+    <p>Withdraw Balance: ₹${data.balance || 0}</p>
+    <button onclick="withdraw()">Withdraw</button>
+  `;
+});
+
+// User ki videos list
+db.ref("videos").orderByChild("uploaderId").equalTo(userId).once("value").then((snapshot) => {
+  snapshot.forEach((child) => {
+    const v = child.val();
+    const vid = document.createElement("div");
+    vid.innerHTML = `
+      <img src="${v.thumbnail}" width="200"><br>
+      <b>${v.title}</b><br>Views: ${v.views}<br><br>
+    `;
+    document.getElementById("myvideos").appendChild(vid);
+  });
+});
+
+function withdraw() {
+  alert("Withdraw system coming soon 🔥");
+}
+</script>
 
 </body>
 </html>
