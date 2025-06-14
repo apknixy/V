@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Withdraw - VideoFire</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="firebase.js"></script>
+</head>
+<body style="background:#121212; color:white; text-align:center;">
+
+  <h1>💸 Withdraw</h1>
+  <p>Minimum ₹100 withdrawal</p>
+  <input id="upi" placeholder="Enter UPI ID"><br>
+  <button onclick="withdraw()">Withdraw</button>
+
+  <p id="msg"></p>
+
+  <script>
+    function withdraw() {
+      const user = auth.currentUser;
+      if (!user) return alert("Login required!");
+
+      db.ref("users/" + user.uid).once("value", snap => {
+        const data = snap.val();
+        if ((data.withdrawBalance || 0) >= 100) {
+          db.ref("withdrawRequests/" + user.uid).set({
+            upi: document.getElementById("upi").value,
+            amount: data.withdrawBalance,
+            timestamp: Date.now()
+          }).then(() => {
+            db.ref("users/" + user.uid + "/withdrawBalance").set(0);
+            document.getElementById("msg").innerText = "Request Submitted!";
+          });
+        } else {
+          document.getElementById("msg").innerText = "Not enough balance!";
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>
