@@ -1,74 +1,74 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
   <title>VideoFire - Upload</title>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="firebase.js"></script>
-
-  <style>
-    body { background: #121212; color: white; font-family: Arial; text-align: center; padding: 20px; }
-    input, textarea, button { margin: 10px; padding: 10px; border-radius: 5px; width: 80%; max-width: 500px; }
-  </style>
 </head>
-<body>
 
-  <h1>Upload Video 🔥</h1>
+<body style="background:#121212;color:white;text-align:center;">
 
-  <input id="title" placeholder="Title"><br>
-  <textarea id="desc" placeholder="Description"></textarea><br>
-  <input id="tags" placeholder="Tags (comma separated)"><br>
-  <input id="url" placeholder="YouTube URL"><br>
+  <h1>🔥 VideoFire - Upload Video</h1>
 
-  <button onclick="uploadVideo()">Upload</button>
-  <p id="msg"></p>
+  <input id="ytlink" placeholder="YouTube Link" style="width:80%;padding:10px;"><br><br>
+  <input id="title" placeholder="Video Title" style="width:80%;padding:10px;"><br><br>
+  <input id="tags" placeholder="Tags (comma separated)" style="width:80%;padding:10px;"><br><br>
+  <textarea id="desc" placeholder="Description" style="width:80%;padding:10px;"></textarea><br><br>
+  <button onclick="upload()">Upload</button><br><br>
+
+  <a href="reels.html" style="color:yellow;">Back to Home</a>
 
   <script>
-    auth.onAuthStateChanged(user => {
-      if (!user) location.href = "index.html";
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (!user) {
+        location.href = "index.html";
+      }
     });
 
-    function cleanYouTubeUrl(url) {
-      if (url.includes("youtube.com/shorts/")) {
-        const id = url.split("shorts/")[1].split("?")[0];
-        return { embed: `https://www.youtube.com/embed/${id}`, thumb: `https://img.youtube.com/vi/${id}/hqdefault.jpg` };
-      } else if (url.includes("youtu.be/")) {
-        const id = url.split("youtu.be/")[1].split("?")[0];
-        return { embed: `https://www.youtube.com/embed/${id}`, thumb: `https://img.youtube.com/vi/${id}/hqdefault.jpg` };
-      } else {
-        return null;
-      }
+    function extractVideoID(url) {
+      // Clean YT URLs & get Video ID
+      url = url.split('?')[0].replace('youtu.be/', 'youtube.com/watch?v=');
+      let id = url.split('v=')[1] || url.split('/shorts/')[1];
+      if (id.includes("&")) id = id.split("&")[0];
+      return id;
     }
 
-    function uploadVideo() {
-      const user = auth.currentUser;
-      const ytUrl = document.getElementById('url').value.trim();
-      const data = cleanYouTubeUrl(ytUrl);
+    function upload() {
+      const user = firebase.auth().currentUser;
+      const uid = user.uid;
 
-      if (!data) {
-        document.getElementById('msg').innerText = "Invalid YouTube URL!";
+      const ytlink = document.getElementById("ytlink").value.trim();
+      const title = document.getElementById("title").value.trim();
+      const tags = document.getElementById("tags").value.trim();
+      const desc = document.getElementById("desc").value.trim();
+
+      if (ytlink === "" || title === "") {
+        alert("Please enter all fields");
         return;
       }
 
-      const video = {
-        ownerId: user.uid,
-        title: document.getElementById('title').value.trim(),
-        description: document.getElementById('desc').value.trim(),
-        tags: document.getElementById('tags').value.trim().split(","),
-        videoUrl: data.embed,
-        thumbnailUrl: data.thumb,
-        timestamp: Date.now()
-      };
+      const videoID = extractVideoID(ytlink);
+      const thumbnail = `https://img.youtube.com/vi/${videoID}/0.jpg`;
+      const embedLink = `https://www.youtube.com/embed/${videoID}`;
 
-      const videoRef = db.ref("videos").push();
-      videoRef.set(video)
-        .then(() => {
-          document.getElementById('msg').innerText = "Video Uploaded Successfully!";
-        }).catch(err => {
-          document.getElementById('msg').innerText = err.message;
-        });
+      const key = firebase.database().ref().child("videos").push().key;
+      firebase.database().ref("videos/" + key).set({
+        uid: uid,
+        ytID: videoID,
+        embed: embedLink,
+        thumbnail: thumbnail,
+        title: title,
+        tags: tags,
+        desc: desc,
+        views: 0,
+        likes: 0,
+        uploadTime: Date.now()
+      }).then(() => {
+        alert("Video Uploaded Successfully!");
+        location.href = "reels.html";
+      });
     }
   </script>
 
