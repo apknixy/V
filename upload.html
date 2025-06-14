@@ -1,76 +1,82 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>VideoFire - Upload</title>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="firebase.js"></script>
+  <meta charset="UTF-8">
+  <title>Upload | VideoFire 🔥</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { background: #121212; color: white; font-family: Arial, sans-serif; padding: 20px; }
+    input, textarea { width: 100%; margin: 10px 0; padding: 10px; border-radius: 8px; border: none; }
+    button { padding: 10px 20px; border: none; border-radius: 8px; background: #ff3c00; color: white; font-weight: bold; }
+  </style>
 </head>
+<body>
 
-<body style="background:#121212;color:white;text-align:center;">
+<h2>Upload Your Video 🔥</h2>
 
-  <h1>🔥 VideoFire - Upload Video</h1>
+<input type="text" id="yturl" placeholder="YouTube Video URL">
+<input type="text" id="title" placeholder="Video Title">
+<textarea id="desc" placeholder="Video Description"></textarea>
+<input type="text" id="tags" placeholder="Tags (comma separated)">
+<button onclick="uploadVideo()">Upload</button>
 
-  <input id="ytlink" placeholder="YouTube Link" style="width:80%;padding:10px;"><br><br>
-  <input id="title" placeholder="Video Title" style="width:80%;padding:10px;"><br><br>
-  <input id="tags" placeholder="Tags (comma separated)" style="width:80%;padding:10px;"><br><br>
-  <textarea id="desc" placeholder="Description" style="width:80%;padding:10px;"></textarea><br><br>
-  <button onclick="upload()">Upload</button><br><br>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js"></script>
 
-  <a href="reels.html" style="color:yellow;">Back to Home</a>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDes3ioeygnWBqJB6NnHb7xj732JJhOqm8",
+    authDomain: "videofire-268ff.firebaseapp.com",
+    databaseURL: "https://videofire-268ff-default-rtdb.firebaseio.com",
+    projectId: "videofire-268ff",
+    storageBucket: "videofire-268ff.appspot.com",
+    messagingSenderId: "910374058927",
+    appId: "1:910374058927:web:6add3afdea07cfa2914d5a"
+  };
 
-  <script>
-    firebase.auth().onAuthStateChanged(function(user) {
-      if (!user) {
-        location.href = "index.html";
-      }
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  function extractVideoID(url) {
+    const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:shorts\/|watch\?v=)|youtu\.be\/)([\w\-]{11})/;
+    const match = url.match(ytRegex);
+    return match ? match[1] : null;
+  }
+
+  function uploadVideo() {
+    const url = document.getElementById("yturl").value.trim();
+    const title = document.getElementById("title").value.trim();
+    const desc = document.getElementById("desc").value.trim();
+    const tags = document.getElementById("tags").value.trim();
+
+    const videoID = extractVideoID(url);
+    if (!videoID) {
+      alert("Invalid YouTube URL!");
+      return;
+    }
+
+    const thumbnail = `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`;
+
+    const videoData = {
+      url: url,
+      title: title,
+      description: desc,
+      tags: tags,
+      thumbnail: thumbnail,
+      views: 0,
+      likes: 0,
+      comments: []
+    };
+
+    db.ref("videos").push(videoData, () => {
+      alert("Video Uploaded Successfully 🔥");
+      document.getElementById("yturl").value = "";
+      document.getElementById("title").value = "";
+      document.getElementById("desc").value = "";
+      document.getElementById("tags").value = "";
     });
-
-    function extractVideoID(url) {
-      // Clean YT URLs & get Video ID
-      url = url.split('?')[0].replace('youtu.be/', 'youtube.com/watch?v=');
-      let id = url.split('v=')[1] || url.split('/shorts/')[1];
-      if (id.includes("&")) id = id.split("&")[0];
-      return id;
-    }
-
-    function upload() {
-      const user = firebase.auth().currentUser;
-      const uid = user.uid;
-
-      const ytlink = document.getElementById("ytlink").value.trim();
-      const title = document.getElementById("title").value.trim();
-      const tags = document.getElementById("tags").value.trim();
-      const desc = document.getElementById("desc").value.trim();
-
-      if (ytlink === "" || title === "") {
-        alert("Please enter all fields");
-        return;
-      }
-
-      const videoID = extractVideoID(ytlink);
-      const thumbnail = `https://img.youtube.com/vi/${videoID}/0.jpg`;
-      const embedLink = `https://www.youtube.com/embed/${videoID}`;
-
-      const key = firebase.database().ref().child("videos").push().key;
-      firebase.database().ref("videos/" + key).set({
-        uid: uid,
-        ytID: videoID,
-        embed: embedLink,
-        thumbnail: thumbnail,
-        title: title,
-        tags: tags,
-        desc: desc,
-        views: 0,
-        likes: 0,
-        uploadTime: Date.now()
-      }).then(() => {
-        alert("Video Uploaded Successfully!");
-        location.href = "reels.html";
-      });
-    }
-  </script>
+  }
+</script>
 
 </body>
 </html>
