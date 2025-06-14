@@ -1,40 +1,51 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Withdraw - VideoFire</title>
-  <script type="module" src="./firebase.js"></script>
   <style>
-    body { background:#121212; color:white; text-align:center; font-family:sans-serif; }
-    input { margin:10px; padding:10px; width:80%; }
-    button { padding:10px 20px; }
+    body { background:#121212; color:white; font-family:sans-serif; text-align:center; padding:50px; }
+    input, button { padding:10px; margin:10px; width:80%; }
   </style>
 </head>
 <body>
-  <h1>Withdraw</h1>
-  <p>Minimum 100 coins required (₹100)</p>
-  <input type="text" id="upi" placeholder="Enter UPI ID" />
-  <button onclick="withdraw()">Request Withdraw</button>
 
-  <script type="module">
-    import { auth, database } from './firebase.js';
-    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+  <h1>Withdraw Request</h1>
+  <p>Minimum 100 coins = ₹100</p>
 
-    let userId = "";
-    onAuthStateChanged(auth, (user) => { if(user) userId = user.uid; });
+  <input id="upi" placeholder="Enter UPI ID">
+  <button onclick="requestWithdraw()">Request</button>
 
-    window.withdraw = () => {
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDes3ioeygnWBqJB6NnHb7xj732JJhOqm8",
+      authDomain: "videofire-268ff.firebaseapp.com",
+      databaseURL: "https://videofire-268ff-default-rtdb.firebaseio.com",
+      projectId: "videofire-268ff",
+      storageBucket: "videofire-268ff.appspot.com",
+      messagingSenderId: "910374058927",
+      appId: "1:910374058927:web:6add3afdea07cfa2914d5a"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    function requestWithdraw() {
       const upi = document.getElementById("upi").value;
-      const db = getDatabase();
-      push(ref(db, 'withdraws'), {
-        uid: userId,
-        upi: upi,
-        requestAt: Date.now(),
-        status: 'pending'
+      firebase.auth().onAuthStateChanged(user => {
+        if(user) {
+          firebase.database().ref('withdraws/' + user.uid).push({
+            upi: upi,
+            requestedAt: Date.now(),
+            status: 'pending'
+          });
+          alert("Request submitted!");
+        }
       });
-      alert("Withdraw request submitted.");
     }
   </script>
+
 </body>
 </html>
