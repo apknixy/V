@@ -1,40 +1,70 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Withdraw - VideoFire</title>
+  <title>VideoFire - Withdraw</title>
+  <style>
+    body { background:#121212; color:white; font-family:sans-serif; text-align:center; padding-top:50px; }
+    input, button { padding:10px; width:80%; margin:10px; }
+    .info { background:#222; padding:10px; margin:10px; border-radius:5px; }
+  </style>
+
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="firebase.js"></script>
 </head>
-<body style="background:#121212; color:white; text-align:center;">
 
-  <h1>💸 Withdraw</h1>
-  <p>Minimum ₹100 withdrawal</p>
-  <input id="upi" placeholder="Enter UPI ID"><br>
-  <button onclick="withdraw()">Withdraw</button>
+<body>
 
-  <p id="msg"></p>
+  <h1>🔥 Withdraw Earnings</h1>
+
+  <div class="info" id="balanceDiv">Loading balance...</div>
+
+  <input id="upi" placeholder="Enter your UPI ID">
+  <button onclick="requestWithdraw()">Request Withdraw</button>
+
+  <a href="reels.html" style="color:yellow;">Back to Reels</a>
 
   <script>
-    function withdraw() {
-      const user = auth.currentUser;
-      if (!user) return alert("Login required!");
+    let uid, totalEarn = 0;
 
-      db.ref("users/" + user.uid).once("value", snap => {
-        const data = snap.val();
-        if ((data.withdrawBalance || 0) >= 100) {
-          db.ref("withdrawRequests/" + user.uid).set({
-            upi: document.getElementById("upi").value,
-            amount: data.withdrawBalance,
-            timestamp: Date.now()
-          }).then(() => {
-            db.ref("users/" + user.uid + "/withdrawBalance").set(0);
-            document.getElementById("msg").innerText = "Request Submitted!";
-          });
-        } else {
-          document.getElementById("msg").innerText = "Not enough balance!";
-        }
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (!user) {
+        location.href = "index.html";
+      } else {
+        uid = user.uid;
+        loadBalance();
+      }
+    });
+
+    function loadBalance() {
+      firebase.database().ref("users/" + uid).once("value", function(snapshot) {
+        const data = snapshot.val();
+        totalEarn = data?.totalEarnings || 0;
+        document.getElementById("balanceDiv").innerText = "Total Balance: ₹" + totalEarn.toFixed(2);
+      });
+    }
+
+    function requestWithdraw() {
+      const upi = document.getElementById("upi").value.trim();
+      if (upi === "") {
+        alert("Please enter UPI ID");
+        return;
+      }
+      if (totalEarn < 100) {
+        alert("Minimum ₹100 required to withdraw");
+        return;
+      }
+
+      firebase.database().ref("withdrawRequests/" + uid).set({
+        uid: uid,
+        upi: upi,
+        amount: totalEarn,
+        status: "Pending",
+        requestTime: Date.now()
+      }).then(() => {
+        alert("Withdraw Request Submitted!");
+        document.getElementById("upi").value = "";
       });
     }
   </script>
