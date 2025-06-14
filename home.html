@@ -8,26 +8,36 @@
     .video-container { height:100vh; width:100%; overflow-y:scroll; scroll-snap-type:y mandatory; }
     .video { scroll-snap-align:start; height:100vh; display:flex; justify-content:center; align-items:center; position:relative; }
     video { height:100vh; width:auto; }
-    .timer { position:absolute; bottom:10px; right:10px; color:white; font-size:24px; }
+    .timer { position:absolute; bottom:50px; right:10px; color:white; font-size:24px; }
+    .coin { position:absolute; top:10px; right:10px; color:yellow; font-size:20px; }
+    .ads { position:absolute; bottom:0; width:100%; height:50px; background:black; color:white; text-align:center; }
   </style>
 </head>
 <body>
-  <div class="video-container" id="feed">
-    <!-- Videos will load here -->
-  </div>
+  <div class="video-container" id="feed"></div>
 
   <script>
+    // Sample videos
     const videos = [
       "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
       "https://samplelib.com/lib/preview/mp4/sample-10s.mp4"
     ];
-    
+
+    let coins = 0;
     const container = document.getElementById("feed");
 
     videos.forEach(url => {
       const div = document.createElement("div");
       div.className = "video";
-      div.innerHTML = `<video src="${url}" autoplay muted loop></video><div class="timer">15</div>`;
+      div.innerHTML = `
+        <video src="${url}" autoplay muted loop></video>
+        <div class="timer">15</div>
+        <div class="coin">Coins: ${coins}</div>
+        <div class="ads">
+          <!-- VAST or Adsterra Code -->
+          <script type='text/javascript' src='//pl26835142.profitableratecpm.com/db/27/6d/db276d3b5f1289379bbe5d365485ac52.js'></script>
+        </div>
+      `;
       container.appendChild(div);
     });
 
@@ -36,12 +46,15 @@
       allVideos.forEach((vid, idx) => {
         let timer = 15;
         const timerDiv = vid.parentElement.querySelector(".timer");
+        const coinDiv = vid.parentElement.querySelector(".coin");
         vid.addEventListener('playing', () => {
           const interval = setInterval(() => {
             timerDiv.textContent = --timer;
             if (timer <= 0) {
               clearInterval(interval);
-              // ✅ Here we will give reward coin
+              coins++;
+              coinDiv.textContent = `Coins: ${coins}`;
+              // 🔒 Anti-fraud: Only reward once
             }
           }, 1000);
         });
