@@ -1,46 +1,71 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>VideoFire - Login</title>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="firebase.js"></script>
+  <meta charset="UTF-8">
+  <title>VideoFire 🔥</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; background-color: #121212; color: white; }
+    .video-container { height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; }
+    .video-card { height: 100vh; scroll-snap-align: start; position: relative; display: flex; justify-content: center; align-items: center; }
+    iframe { width: 100%; height: 100%; border: none; }
+    .overlay { position: absolute; bottom: 100px; right: 10px; display: flex; flex-direction: column; gap: 20px; font-size: 30px; }
+    .overlay div { cursor: pointer; }
+    .banner-ad { height: 60px; width: 100%; position: absolute; bottom: 0; background: #333; display: flex; justify-content: center; align-items: center; }
+  </style>
 </head>
-<body style="background:#121212;color:white;text-align:center;">
+<body>
 
-  <h1>🔥 VideoFire</h1>
-  <input id="email" placeholder="Email"><br><br>
-  <input id="pass" placeholder="Password" type="password"><br><br>
-  <button onclick="login()">Login</button>
-  <button onclick="register()">Register</button>
+<div class="video-container" id="videos">
+  <!-- Dynamic Video Cards will be loaded here -->
+</div>
 
-  <script>
-    function login() {
-      const email = document.getElementById("email").value;
-      const pass = document.getElementById("pass").value;
-      firebase.auth().signInWithEmailAndPassword(email, pass)
-      .then(()=> location.href="reels.html")
-      .catch(e=> alert(e.message));
-    }
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js"></script>
 
-    function register() {
-      const email = document.getElementById("email").value;
-      const pass = document.getElementById("pass").value;
-      firebase.auth().createUserWithEmailAndPassword(email, pass)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        firebase.database().ref("users/"+user.uid).set({
-          email: user.email,
-          withdrawBalance: 0,
-          totalEarnings: 0,
-          totalViews: 0,
-          username: email.split("@")[0]
-        }).then(()=> location.href="reels.html");
-      })
-      .catch(e=> alert(e.message));
-    }
-  </script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDes3ioeygnWBqJB6NnHb7xj732JJhOqm8",
+    authDomain: "videofire-268ff.firebaseapp.com",
+    databaseURL: "https://videofire-268ff-default-rtdb.firebaseio.com",
+    projectId: "videofire-268ff",
+    storageBucket: "videofire-268ff.appspot.com",
+    messagingSenderId: "910374058927",
+    appId: "1:910374058927:web:6add3afdea07cfa2914d5a"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  function extractVideoID(url) {
+    const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:shorts\/|watch\?v=)|youtu\.be\/)([\w\-]{11})/;
+    const match = url.match(ytRegex);
+    return match ? match[1] : null;
+  }
+
+  function loadVideos() {
+    const videosDiv = document.getElementById("videos");
+    db.ref("videos").once("value", snapshot => {
+      snapshot.forEach(child => {
+        const data = child.val();
+        const videoID = extractVideoID(data.url);
+        const iframe = `<iframe src="https://www.youtube.com/embed/${videoID}?controls=0&autoplay=0&mute=1" allowfullscreen></iframe>`;
+        const card = document.createElement("div");
+        card.className = "video-card";
+        card.innerHTML = iframe + `
+          <div class="overlay">
+            <div>♡</div>
+            <div>🗨️</div>
+            <div>⌲</div>
+          </div>
+          <div class="banner-ad">Ad will load here</div>`;
+        videosDiv.appendChild(card);
+      });
+    });
+  }
+
+  loadVideos();
+</script>
 
 </body>
 </html>
