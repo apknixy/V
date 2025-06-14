@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>VideoFire</title>
+  <style>
+    body { margin:0; background:#121212; overflow:hidden; }
+    .video-container { height:100vh; width:100%; overflow-y:scroll; scroll-snap-type:y mandatory; }
+    .video { scroll-snap-align:start; height:100vh; display:flex; justify-content:center; align-items:center; position:relative; }
+    video { height:100vh; width:auto; }
+    .timer { position:absolute; bottom:10px; right:10px; color:white; font-size:24px; }
+  </style>
+</head>
+<body>
+  <div class="video-container" id="feed">
+    <!-- Videos will load here -->
+  </div>
+
+  <script>
+    const videos = [
+      "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+      "https://samplelib.com/lib/preview/mp4/sample-10s.mp4"
+    ];
+    
+    const container = document.getElementById("feed");
+
+    videos.forEach(url => {
+      const div = document.createElement("div");
+      div.className = "video";
+      div.innerHTML = `<video src="${url}" autoplay muted loop></video><div class="timer">15</div>`;
+      container.appendChild(div);
+    });
+
+    const updateTimers = () => {
+      const allVideos = document.querySelectorAll("video");
+      allVideos.forEach((vid, idx) => {
+        let timer = 15;
+        const timerDiv = vid.parentElement.querySelector(".timer");
+        vid.addEventListener('playing', () => {
+          const interval = setInterval(() => {
+            timerDiv.textContent = --timer;
+            if (timer <= 0) {
+              clearInterval(interval);
+              // ✅ Here we will give reward coin
+            }
+          }, 1000);
+        });
+      });
+    };
+
+    updateTimers();
+  </script>
+</body>
+</html>
