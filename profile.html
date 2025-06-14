@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Profile - VideoFire</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="firebase.js"></script>
+</head>
+<body style="background:#121212; color:white; text-align:center;">
+
+  <h1>👤 My Profile</h1>
+  <div id="profile"></div>
+
+  <script>
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        location.href = "index.html";
+      } else {
+        db.ref("users/" + user.uid).once("value", snap => {
+          const data = snap.val();
+          document.getElementById("profile").innerHTML = `
+            <p>Username: ${data.username}</p>
+            <p>Email: ${data.email}</p>
+            <p>Total Earnings: ₹${data.totalEarnings || 0}</p>
+            <p>Total Views: ${data.totalViews || 0}</p>
+            <p>Withdrawable Balance: ₹${data.withdrawBalance || 0}</p>
+          `;
+        });
+      }
+    });
+  </script>
+
+</body>
+</html>
