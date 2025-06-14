@@ -68,7 +68,48 @@
       });
     });
   }
+function displayVideo(key, data) {
+  const div = document.createElement("div");
+  div.className = "videoCard";
+  div.innerHTML = `
+    <img src="${data.thumbnail}" width="100%" style="border-radius:10px;"><br>
+    <b>${data.title}</b><br>
+    Views: ${data.views} | Likes: ${data.likes}<br>
+    <div>
+      <button onclick="likeVideo('${key}')">♡</button>
+      <button onclick="openComments('${key}')">🗨️</button>
+      <button onclick="shareVideo('${key}')">⌲</button>
+    </div>
+  `;
+  document.getElementById("videos").appendChild(div);
+}
 
+// Like Button System
+function likeVideo(key) {
+  const likeRef = db.ref("videos/" + key + "/likes");
+  likeRef.transaction(function (currentLikes) {
+    return (currentLikes || 0) + 1;
+  });
+}
+
+// Share System
+function shareVideo(key) {
+  const link = window.location.origin + "/index.html?video=" + key;
+  navigator.clipboard.writeText(link);
+  alert("Shareable Link Copied: " + link);
+}
+
+// Comments System
+function openComments(key) {
+  const comment = prompt("Enter your comment:");
+  if (comment) {
+    const commentData = {
+      user: "anonymous",
+      text: comment
+    };
+    db.ref("videos/" + key + "/comments").push(commentData);
+  }
+}
   loadVideos();
 </script>
 
