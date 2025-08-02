@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Sayfası</title>
+    <title>Çoklu Pencere Açıcı</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -14,50 +14,119 @@
             min-height: 100vh;
             margin: 0;
             background-color: #f0f0f0;
+            text-align: center;
         }
         .container {
-            text-align: center;
             background-color: #fff;
-            padding: 20px;
+            padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        iframe {
-            width: 90vw; /* Görünüm genişliğinin %90'ı */
-            height: 70vh; /* Görünüm yüksekliğinin %70'i */
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         button {
-            padding: 10px 20px;
-            font-size: 16px;
+            padding: 12px 25px;
+            font-size: 18px;
             cursor: pointer;
-            background-color: #007bff;
+            background-color: #28a745;
             color: white;
             border: none;
             border-radius: 5px;
             transition: background-color 0.3s ease;
+            margin-top: 20px;
         }
         button:hover {
-            background-color: #0056b3;
+            background-color: #218838;
+        }
+        p {
+            margin-top: 20px;
+            color: #666;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Gömülü İçerik</h1>
-        <!-- iframe'in 'src' özelliğine istediğiniz URL'yi buraya yapıştırın -->
-        <iframe id="contentFrame" src="https://otieu.com/4/8488666"></iframe>
-        
-        <button onclick="refreshFrame()">Sayfayı Yenile</button>
+        <h1>Çoklu Pencere Açma Denemesi</h1>
+        <p>Aşağıdaki düğmeye bastığınızda 50 farklı pencere açılmaya çalışılacaktır. Tarayıcınızın pop-up engelleyicisi bunu engelleyebilir.</p>
+        <button onclick="openMultipleWindows()">50 Pencereyi Aç ve Yenile Butonu Ekle</button>
+        <p id="status"></p>
     </div>
 
     <script>
-        function refreshFrame() {
-            var iframe = document.getElementById('contentFrame');
-            // iframe'in mevcut URL'sini yeniden yükler
-            iframe.src = iframe.src; 
+        const targetUrl = "https://otieu.com/4/8488666";
+        const numberOfWindows = 50;
+        let openedWindows = [];
+
+        function openMultipleWindows() {
+            const statusElement = document.getElementById('status');
+            statusElement.innerText = "Pencereler açılmaya çalışılıyor...";
+            
+            // Mevcut tüm açık pencereleri kapat (isteğe bağlı, deneme amaçlı)
+            openedWindows.forEach(win => {
+                if (win && !win.closed) {
+                    win.close();
+                }
+            });
+            openedWindows = []; // Diziyi temizle
+
+            for (let i = 0; i < numberOfWindows; i++) {
+                // Her pencereye benzersiz bir isim veriyoruz, bu aynı pencerenin tekrar açılmasını önleyebilir
+                // veya tarayıcının yeni bir sekme/pencere olarak ele almasına yardımcı olabilir.
+                // Ancak yine de pop-up engelleyici devreye girecektir.
+                const windowName = `myWindow${i}`; 
+                const windowFeatures = `width=800,height=600,left=${i * 10},top=${i * 10},resizable=yes,scrollbars=yes`; // Her pencereyi biraz farklı konumda açmaya çalışır
+
+                try {
+                    const newWindow = window.open(targetUrl, windowName, windowFeatures);
+                    if (newWindow) {
+                        openedWindows.push(newWindow);
+                        // Yeni açılan pencereye refresh butonu ve script ekle
+                        newWindow.onload = function() {
+                            if (newWindow.document.body) { // Body yüklendiğinden emin ol
+                                const refreshButton = newWindow.document.createElement('button');
+                                refreshButton.innerText = 'Sayfayı Yenile';
+                                refreshButton.style.marginTop = '20px';
+                                refreshButton.style.padding = '10px 20px';
+                                refreshButton.style.fontSize = '16px';
+                                refreshButton.style.cursor = 'pointer';
+                                refreshButton.style.backgroundColor = '#007bff';
+                                refreshButton.style.color = 'white';
+                                refreshButton.style.border = 'none';
+                                refreshButton.style.borderRadius = '5px';
+                                refreshButton.onclick = function() {
+                                    newWindow.location.reload(); // Sayfayı tamamen yeniden yükle
+                                };
+                                
+                                // Yeni pencerenin body'sine butonu ekle
+                                // Not: Same-origin policy nedeniyle, eğer targetUrl farklı bir domain ise
+                                // yeni pencerenin içeriğine doğrudan müdahale edemezsiniz.
+                                // Bu kod, eğer targetUrl aynı domaindeyse veya boş bir pencere açılıp içerik sonradan yazılıyorsa çalışır.
+                                // Sizin verdiğiniz URL farklı bir domain olduğu için bu kısım çalışmayacaktır.
+                                // Sadece ana pencere bu scripti çalıştırabilir.
+                                // Bu yüzden, her pencerenin kendi yenileme butonu olması için her pencere ayrı bir HTML dosyası olmalıdır.
+                                // YADA açılan pencerenin içeriğine doğrudan müdahale edemeyeceğimiz için,
+                                // bu yenileme düğmesinin bu senaryoda doğrudan işe yaramayacağını belirtmek önemlidir.
+                                // iframe kullanmadan doğrudan "ekran" olarak açtığınızda,
+                                // açılan pencerenin içeriğini dışarıdan kontrol edemezsiniz.
+                                // Bu, güvenlik nedeniyledir (same-origin policy).
+
+                                // Yani bu kısım şu anki isteğiniz için (farklı bir URL'yi açıp kontrol etmek)
+                                // başarılı olmayacaktır. Eğer açılan pencerenin URL'si sizin kontrolünüzdeki bir sayfa ise,
+                                // o sayfanın HTML'sine bu yenileme butonunu doğrudan eklemelisiniz.
+                            }
+                        };
+                    } else {
+                        statusElement.innerText += `\nPencere ${i + 1} pop-up engelleyici tarafından engellendi.`;
+                        break; // İlk engellemede dur
+                    }
+                } catch (e) {
+                    statusElement.innerText += `\nPencere ${i + 1} açılamadı: ${e.message}`;
+                    break; // Hata durumunda dur
+                }
+            }
+            if (openedWindows.length > 0) {
+                statusElement.innerText += `\n${openedWindows.length} pencere açılmaya çalışıldı. Lütfen tarayıcınızın pop-up ayarlarını kontrol edin.`;
+            } else {
+                statusElement.innerText = "Hiçbir pencere açılamadı. Tarayıcınızın pop-up engelleyicisini kontrol edin.";
+            }
         }
     </script>
 </body>
